@@ -1,58 +1,59 @@
-import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../components/hooks";
-import { setUser } from "../components/store/action";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { ChangeEvent, useState } from "react";
+import Widget from "../components/widget";
+import { componentDictionary } from "../const-data";
 
 function MainPage() {
-    const navigate = useNavigate();
-    const dispatch = useAppDispatch();
+    const [columnData, setColumnData] = useState<(JSX.Element | null)[]>([null, null, null])
 
-    const userData = useAppSelector((state) => state.userData);
+    function onDragEnd(result: DropResult) {
+        const { destination, source } = result;
 
-    const [name, setName] = useState(userData.name);
-    const [roomNumber, setRoomNumber] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-
-    useEffect(() => {
-        setName(userData.name);
-    }, [userData]);
-
-    const handleName = (evt: ChangeEvent<HTMLInputElement>) => {
-        setName(evt.target.value);
-        setErrorMessage('');
-    };
-
-    const handleRoomNumber = (evt: ChangeEvent<HTMLInputElement>) => {
-        setRoomNumber(evt.target.value);
-        setErrorMessage('');
-    };
-
-    const handleSubmit = (evt: SyntheticEvent) => {
-        evt.preventDefault();
-        if (!name || !roomNumber) {
-            setErrorMessage('Поле имени и комнаты не должно быть пустым');
+        if (!destination || destination.droppableId === source.droppableId) {
             return;
         }
-        const data = {
-            name: name,
-            currentRoom: roomNumber
-        };
-        dispatch(setUser(data));
-        localStorage.setItem('userData', JSON.stringify(data));
 
-        navigate(`/chat/${data.currentRoom}`);
+        const DragElement = columnData[Number(source.droppableId) - 1]
+        const DropElement = columnData[Number(destination.droppableId) - 1]
+
+        const newColumnData = [...columnData]
+        newColumnData[Number(source.droppableId) - 1] = DropElement
+        newColumnData[Number(destination.droppableId) - 1] = DragElement
+
+        setColumnData(newColumnData)
     };
 
+    function handleAddWidget(evt: ChangeEvent<HTMLSelectElement>, id: number) {
+        const SelectedWidget = componentDictionary[evt.target.value]
+        const newColumnData = [...columnData]
+        newColumnData[id - 1] = <SelectedWidget key={id} id={String(id)} />
+        setColumnData(newColumnData)
+    }
+
+    function handleDeleteButton(id: number) {
+        const newColumnData = [...columnData]
+        newColumnData[id - 1] = null
+        setColumnData(newColumnData)
+    }
+
     return (
-        <div className="main-page">
-            <form onSubmit={handleSubmit}>
-                <input required type="text" placeholder="Введите имя" value={name} onChange={handleName}></input>
-                <input required type="text" placeholder="Введите номер комнаты" value={roomNumber} onChange={handleRoomNumber}></input>
-                <p className="error">{errorMessage}</p>
-                <button type="submit" className="send-button">Присоединиться</button>
-            </form>
-        </div>
-    );
+
+        <DragDropContext onDragEnd={onDragEnd}>
+            <div className="widget-block">
+                {
+                    Array.from({ length: 3 }, (_, index) => (
+                        <Widget
+                            key={index}
+                            id={index}
+                            columnData={columnData}
+                            onChange={handleAddWidget}
+                            onClick={handleDeleteButton}
+                        />
+                    ))
+                }
+            </div>
+        </DragDropContext>
+    )
 }
 
 export default MainPage;

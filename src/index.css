@@ -11,173 +11,147 @@ body {
     padding-top: 40px;
 }
 
-svg path {
-    fill: rgb(155, 89, 163);
-    margin: 0 auto;
-}
-
-#root {
-    width: 900px;
-    background-color: white;
-    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-    margin: 0 auto;
-    border-radius: 33px;
-    padding: 38px 97px 38px 97px;
-    box-sizing: border-box;
-    font-family: 'Montserrat';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 25px;
-}
-
-h2 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 35px;
-}
-
-input,
-.message-box {
-    margin-bottom: 10px;
-    width: 100%;
-    height: 34px;
-    border-radius: 6px;
-    background-color: white;
-    font-size: 18px;
-    color: #333333;
-    border: 1px solid #AEAEAE;
-    padding: 6px 0 6px 10px;
-}
-
-.room {
-    position: relative;
-}
-
-.exit-button {
-    position: absolute;
-    left: 84%;
-}
-
-.chat {
-    min-height: 600px;
-    max-height: 600px;
-    overflow: auto;
-}
-
-.chat::-webkit-scrollbar {
-    width: 0.5em;
-}
-
-.chat::-webkit-scrollbar-track {
-    background-color: white;
-}
-
-.chat::-webkit-scrollbar-thumb {
-    background-color: white;
-}
-
-#chat-room-form {
+.widget-block {
     display: flex;
+    flex-wrap: wrap;
+    gap: 100px;
+    height: 100px;
+    justify-content: center;
 }
 
-#chat-room-form input {
-    margin-top: 10px;
-    box-sizing: border-box;
-    width: 95%;
+.widget {
+    position: relative;
+    width: 400px;
+    color: white;
+    border-radius: 24px;
+    height: 150px;
+    background-color: rgb(73, 73, 73);
+    padding: 24px;
+    padding-top: 100px;
 }
 
-#chat-room-form button:not(.EmojiPickerReact button) {
-    margin-top: 10px;
-    height: 34px;
-    box-sizing: border-box;
-    background-color: white;
-    width: 5%;
-    padding: 0;
-    padding-top: 3px;
+.widget .element {
+    background: white;
 }
 
-button:not(.EmojiPickerReact button),
-.link-button {
+p.great {
+    transition: 1s;
+    color: lightgreen;
+}
+
+p.bad {
+    transition: 1s;
+    color: lightcoral;
+}
+
+select,
+button {
+    color: white;
+    background-color: rgb(155, 89, 163);
+    min-width: 64px;
+    padding: 3px 16px;
+    font-size: 1rem;
+    height: 30px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px;
+}
+
+button {
     cursor: pointer;
-    display: table;
-    text-decoration: none;
-    font-family: 'Montserrat';
-    font-weight: 400;
-    font-size: 24px;
-    color: #FFFFFF;
-    width: max-content;
-    height: 42px;
-    background: rgb(155, 89, 163);
-    border-radius: 10px;
-    padding: 7px 7px 7px 7px;
-    text-align: center;
+    position: absolute;
+    top: 10%;
+    left: 32%;
+    display: block;
     margin: 0 auto;
     border: none;
+    border-radius: 30px;
 }
 
-.link-button {
-    height: auto !important;
+.widget-select {
+    display: block;
+    margin: 0 auto;
 }
 
-.chat .self-message,
-.chat .other-message {
-    cursor: pointer;
-    box-sizing: border-box;
-    word-wrap: break-word;
-    width: fit-content;
-    max-width: 50%;
-    background: #EAEAEA;
-    border-radius: 6px;
-    margin: 10px 0;
-    padding: 5px 5px 5px 5px;
-    font-size: 18px;
+.rubles-conversion,
+.currency-checker-block,
+.weather-block {
+    background-color: rgb(73, 73, 73);
+    margin-bottom: 20px;
 }
 
-.chat .self-message {
-    background-color: rgb(155, 89, 163);
-    color: white;
-    margin-left: auto;
+.rubles-conversion .other-field,
+.rubles-conversion .rubles-field {
+    height: 30px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
 }
 
-.message .name {
-    font-weight: bold;
+.sub-currency {
+    margin-left: 20px;
 }
 
-.EmojiPickerReact {
-    position: absolute !important;
-    left: 50%;
-    top: 32%;
+.currency-select-block {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.quote {
-    background-color: white;
-    border: 1px solid black;
+.convert-value {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    font-size: 2rem;
 }
 
-.quote .message p {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.triangle {
+    margin-top: 10px;
+    position: relative;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 20px solid rgb(73, 73, 73);
 }
 
-.quote img {
-    max-width: 100%;
-    max-height: 200px;
+.triangle.great {
+    transition: 1s;
+    border-bottom: 20px solid green;
 }
 
-.textImage {
-    max-width: 100%;
-    max-height: 400px;
+.triangle.bad {
+    transition: 1s;
+    transform: rotate(180deg);
+    border-bottom-color: red;
 }
 
-input[type='file'] {
-    width: fit-content;
-    height: fit-content;
+.weather-info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
-.error {
-    color: red;
+.weather-info p {
+    margin-bottom: 5px;
 }
+
+.weather-info img {
+    background-color: rgb(82, 201, 238);
+    border-radius: 50%;
+}
+
+.weather-block select {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.weather-data {
+    text-align: right;
+}
+
+input {
+    background-color: rgb(234, 197, 238);
+    padding-left: 10px;
+}
+
+@media (max-width: 1280px) {}
