@@ -3,7 +3,7 @@ import { Droppable, DroppableProvided } from "react-beautiful-dnd";
 import { widgetList } from "../const-data";
 
 type WidgetProps = {
-    columnData: (JSX.Element | null)[];
+    columnData: JSX.Element | null;
     onChange: (evt: ChangeEvent<HTMLSelectElement>, id: number) => void;
     onClick: (id: number) => void;
     id: number;
@@ -11,20 +11,20 @@ type WidgetProps = {
 
 function Widget({ columnData, onChange, onClick, id }: WidgetProps) {
     function handleSelectChange(evt: ChangeEvent<HTMLSelectElement>) {
-        onChange(evt, id + 1);
+        onChange(evt, id);
     };
 
     function handleDeleteClick() {
-        onClick(id + 1);
+        onClick(id);
     };
 
     return (
-        <Droppable droppableId={String(id + 1)}>
+        <Droppable droppableId={String(id)}>
             {(provided: DroppableProvided) => (
                 <div className="widget" ref={provided.innerRef} {...provided.droppableProps}>
-                    {columnData[id] && columnData[id]}
+                    {columnData}
                     {provided.placeholder}
-                    {columnData[id] ? (
+                    {columnData ? (
                         <button value={'deleteWidget'} onClick={handleDeleteClick}>
                             Удалить Виджет
                         </button>
