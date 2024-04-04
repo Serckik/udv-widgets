@@ -24,10 +24,11 @@ body {
     width: 400px;
     color: white;
     border-radius: 24px;
-    height: 150px;
+    height: 750px;
     background-color: rgb(73, 73, 73);
     padding: 24px;
-    padding-top: 100px;
+    padding-top: 50px;
+    overflow: auto !important;
 }
 
 .widget .element {
@@ -57,9 +58,6 @@ button {
 
 button {
     cursor: pointer;
-    position: absolute;
-    top: 10%;
-    left: 32%;
     display: block;
     margin: 0 auto;
     border: none;
@@ -69,12 +67,12 @@ button {
 .widget-select {
     display: block;
     margin: 0 auto;
+    margin-bottom: 10px;
 }
 
 .rubles-conversion,
 .currency-checker-block,
 .weather-block {
-    background-color: rgb(73, 73, 73);
     margin-bottom: 20px;
 }
 
@@ -154,4 +152,9 @@ input {
     padding-left: 10px;
 }
 
-@media (max-width: 1280px) {}
+.widget-component {
+    padding: 20px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    background-color: rgb(97, 95, 95);
+}

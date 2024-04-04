@@ -2,11 +2,16 @@ import { ChangeEvent, useEffect, useState } from "react"
 import { cities } from "../../const-data"
 import { useAppDispatch } from "../hooks"
 import { getWeatherByCityId } from "../store/api-actions.ts/get-actions"
-import { Draggable } from "react-beautiful-dnd"
 import { IMAGES_URL } from "../services/weather-api"
-import { v4 as uuidv4 } from 'uuid';
 
-function Weather() {
+type WeatherProps = {
+    index: number;
+    droppableId: number
+    data: CityType;
+    onChangeProps: (droppableId: number, index: number, props: WidgetsPropsType) => void
+}
+
+function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) {
     const dispatch = useAppDispatch()
 
     const [weatherData, setWeatherData] = useState<WeatherType>({
@@ -15,10 +20,20 @@ function Weather() {
         icon: '',
     })
     const [selectedCity, setSelectedCity] = useState<CityType>(cities[0])
+    useEffect(() => {
+        if (props.data) {
+            setSelectedCity(props.data)
+        }
+        else {
+            onChangeProps(droppableId, index, cities[0])
+        }
+    }, [props.data])
 
     useEffect(() => {
         dispatch(getWeatherByCityId(selectedCity.id)).then((data) => {
-            setWeatherData(data.payload as WeatherType)
+            if (data.payload) {
+                setWeatherData(data.payload as WeatherType)
+            }
         })
     }, [dispatch, selectedCity.id])
 
@@ -26,25 +41,27 @@ function Weather() {
         const currentCity = cities.find((city) => city.id === Number(evt.target.value)) || selectedCity
         setSelectedCity(currentCity)
         dispatch(getWeatherByCityId(currentCity.id))
+        onChangeProps(droppableId, index, currentCity)
     }
 
     return (
-        <Draggable draggableId={uuidv4()} index={1}>
-            {(provided) => (
-                <div className="weather-block" {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef} >
-                    <select value={selectedCity.id} onChange={handleSelect}>
-                        {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
-                    </select>
-                    <div className="weather-info">
+        <div className="weather-block" >
+            <select value={selectedCity.id} onChange={handleSelect}>
+                {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
+            </select>
+            <div className="weather-info">
+                {weatherData.icon ?
+                    <>
                         <img alt="Иконка погоды" src={`${IMAGES_URL}${weatherData.icon}.png`}></img>
                         <div className="weather-data">
                             <p>Ощущается: {Math.round(weatherData.feels_like)} °C</p>
                             <p>Температура: {Math.round(weatherData.temp)} °C</p>
                         </div>
-                    </div>
-                </div>
-            )}
-        </Draggable>
+                    </> :
+                    <>Сервер не отвечает</>
+                }
+            </div>
+        </div>
     )
 }
 

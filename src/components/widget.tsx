@@ -1,43 +1,65 @@
-import { ChangeEvent } from "react";
-import { Droppable, DroppableProvided } from "react-beautiful-dnd";
-import { widgetList } from "../const-data";
+import { Draggable, Droppable, DroppableProvided } from "react-beautiful-dnd";
+import { WidgetComponent } from "../pages/main-page";
+import Weather from "./widgets/weather";
+import CurrencyRubles from "./widgets/currency-rubles";
+import CurrencyChecker from "./widgets/currency-checker";
 
 type WidgetProps = {
-    columnData: JSX.Element | null;
-    onChange: (evt: ChangeEvent<HTMLSelectElement>, id: number) => void;
-    onClick: (id: number) => void;
+    columnData: WidgetComponent[] | null;
+    onClick: (index: number, id: number) => void;
     id: number;
+    onChangeProps: (droppableId: number, index: number, props: WidgetsPropsType) => void
 };
 
-function Widget({ columnData, onChange, onClick, id }: WidgetProps) {
-    function handleSelectChange(evt: ChangeEvent<HTMLSelectElement>) {
-        onChange(evt, id);
+const widgetComponents: {
+    [key: string]: (props: any) => JSX.Element
+} = {
+    weather: Weather,
+    convertRubles: CurrencyRubles,
+    convertAll: CurrencyChecker
+};
+
+function Widget({ columnData, onClick, id, onChangeProps }: WidgetProps) {
+
+    function handleDeleteClick(droppableId: number, index: number) {
+        onClick(droppableId, index);
     };
 
-    function handleDeleteClick() {
-        onClick(id);
+    const renderWidget = (name: string, props: WidgetsPropsType, index: number, droppableId: number) => {
+        const SpecificWidget = widgetComponents[name];
+        if (SpecificWidget) {
+            return (
+                <SpecificWidget
+                    key={`${index}-${droppableId}`}
+                    onChangeProps={onChangeProps}
+                    index={index}
+                    droppableId={droppableId}
+                    {...{ data: props }}
+                />
+            );
+        }
+        return null;
     };
 
     return (
         <Droppable droppableId={String(id)}>
             {(provided: DroppableProvided) => (
                 <div className="widget" ref={provided.innerRef} {...provided.droppableProps}>
-                    {columnData}
+                    {columnData && columnData.map((component, index) => (
+                        <div key={index}>
+                            <Draggable draggableId={String(index) + String(id)} index={index}>
+                                {(provided) => (
+                                    <div className="widget-component" {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef}>
+                                        {renderWidget(component.name, component.props, index, id)}
+                                        <button value={'deleteWidget'} onClick={() => handleDeleteClick(id, index)}>
+                                            Удалить Виджет
+                                        </button>
+                                    </div>
+                                )}
+                            </Draggable>
+                        </div>
+                    ))}
                     {provided.placeholder}
-                    {columnData ? (
-                        <button value={'deleteWidget'} onClick={handleDeleteClick}>
-                            Удалить Виджет
-                        </button>
-                    ) : (
-                        <select className="widget-select" defaultValue={'Добавить виджет'} onChange={handleSelectChange}>
-                            <option disabled>{'Добавить виджет'}</option>
-                            {widgetList.map((widget) => (
-                                <option key={widget} value={widget}>
-                                    {widget}
-                                </option>
-                            ))}
-                        </select>
-                    )}
                 </div>
             )}
         </Droppable>

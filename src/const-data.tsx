@@ -1,7 +1,3 @@
-import CurrencyChecker from "./components/widgets/currency-checker";
-import CurrencyRubles from "./components/widgets/currency-rubles";
-import Weather from "./components/widgets/weather";
-
 export const cities = [
     {
         "id": 524894,
@@ -105,10 +101,4 @@ export const cities = [
     },
 ]
 
-export const widgetList = ['Конвертация рубля', 'Мониторинг валют', 'Погода']
-
-export const componentDictionary: { [key: string]: React.ComponentType<any> } = {
-    'Конвертация рубля': CurrencyRubles,
-    'Мониторинг валют': CurrencyChecker,
-    'Погода': Weather,
-};
+export const widgetList = [{ key: 'convertRubles', value: 'Конвертация рубля' }, { key: 'convertAll', value: 'Мониторинг валют' }, { key: 'weather', value: 'Погода' }]

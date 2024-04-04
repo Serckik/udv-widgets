@@ -55,3 +55,5 @@ type WeatherType = {
     temp: number,
     icon: string
 }
+
+type WidgetsPropsType = CityType | string | { mainCurrency: string, subCurrency: string } | null

@@ -1,10 +1,15 @@
 import { ChangeEvent, useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks"
 import { getCurrencyRubles } from "../store/api-actions.ts/get-actions"
-import { Draggable } from "react-beautiful-dnd"
-import { v4 as uuidv4 } from 'uuid';
 
-function CurrencyRubles() {
+type CurrencyRublesProps = {
+    index: number;
+    droppableId: number;
+    onChangeProps: (droppableId: number, index: number, props: any) => void
+    data: string;
+}
+
+function CurrencyRubles({ index, droppableId, onChangeProps, ...props }: CurrencyRublesProps) {
     const dispatch = useAppDispatch()
 
     const currencyData = useAppSelector((state) => state.currencyData)
@@ -14,12 +19,16 @@ function CurrencyRubles() {
     const [selectedCurrency, setSelectedCurrency] = useState('')
 
     useEffect(() => {
+        setRubles(1)
         const cutCurrencyData = Object.entries(currencyData).map(([charCode, data]) => ({ charCode, name: data.Name }))
         setCurrencyList([...cutCurrencyData])
-        if (cutCurrencyData.length !== 0) {
+        if (cutCurrencyData.length !== 0 && !props.data) {
             setSelectedCurrency(cutCurrencyData[0].charCode)
         }
-    }, [currencyData])
+        else {
+            setSelectedCurrency(props.data)
+        }
+    }, [currencyData, props.data])
 
     useEffect(() => {
         dispatch(getCurrencyRubles())
@@ -48,25 +57,22 @@ function CurrencyRubles() {
 
     function handleSelect(evt: ChangeEvent<HTMLSelectElement>) {
         setSelectedCurrency(evt.target.value)
+        onChangeProps(droppableId, index, evt.target.value)
     }
 
     return (
-        <Draggable draggableId={uuidv4()} index={1}>
-            {(provided) => (
-                <div className="rubles-conversion" {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef}>
-                    <div className="rubles-field">
-                        <input type="number" value={rubles} onChange={handleRubleField}></input>
-                        <span>Российский рубль</span>
-                    </div>
-                    <div className="other-field">
-                        <input type="number" value={otherCurrency} onChange={handleOtherCurrencyField}></input>
-                        <select onChange={handleSelect}>
-                            {currencyList.map(currency => <option key={currency.charCode} value={currency.charCode}>{currency.name} ({currency.charCode})</option>)}
-                        </select>
-                    </div>
-                </div>
-            )}
-        </Draggable>
+        <div className="rubles-conversion">
+            <div className="rubles-field">
+                <input type="number" value={rubles} onChange={handleRubleField}></input>
+                <span>Российский рубль</span>
+            </div>
+            <div className="other-field">
+                <input type="number" value={otherCurrency} onChange={handleOtherCurrencyField}></input>
+                <select onChange={handleSelect} value={selectedCurrency}>
+                    {currencyList.map(currency => <option key={currency.charCode} value={currency.charCode}>{currency.name} ({currency.charCode})</option>)}
+                </select>
+            </div>
+        </div>
     )
 }
 export default CurrencyRubles

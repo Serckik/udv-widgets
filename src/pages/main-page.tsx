@@ -1,64 +1,94 @@
 import { ChangeEvent, useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import Widget from "../components/widget";
-import { componentDictionary } from "../const-data";
+import { widgetList } from "../const-data";
+
+export type WidgetComponent = {
+    name: string;
+    props: WidgetsPropsType;
+}
+
+const initialWidgetData: { drop: number, data: WidgetComponent[] }[] = Array.from({ length: 3 }, (_, index) => ({ drop: index, data: [] }));
 
 function MainPage() {
-    const [widgetData, setWidgetData] = useState<Array<{ id: number, component: JSX.Element | null }>>(
-        Array.from({ length: 3 }, (_, index) => ({ id: index + 1, component: null }))
-    );
+    const [widgetData, setWidgetData] = useState(initialWidgetData);
 
-    function onDragEnd(result: DropResult) {
-        const { destination, source } = result;
+    const onDragEnd = (result: DropResult) => {
+        const { source, destination } = result;
+        if (!destination) return;
 
-        if (!destination || destination.droppableId === source.droppableId) {
-            return;
+        const updatedWidgetData = [...widgetData];
+        const sourceWidgetId = Number(source.droppableId);
+        const destinationWidgetId = Number(destination.droppableId);
+
+        const moveWidget = (sourceId: number, destinationId: number) => {
+            const sourceItems = updatedWidgetData[sourceId].data;
+            const destinationItems = updatedWidgetData[destinationId].data;
+            const [removed] = sourceItems.splice(source.index, 1);
+            destinationItems.splice(destination.index, 0, removed);
+            updatedWidgetData[sourceId] = { ...updatedWidgetData[sourceId], data: sourceItems };
+            updatedWidgetData[destinationId] = { ...updatedWidgetData[destinationId], data: destinationItems };
+        };
+
+        if (source.droppableId === destination.droppableId) {
+            moveWidget(sourceWidgetId, sourceWidgetId);
+        } else {
+            moveWidget(sourceWidgetId, destinationWidgetId);
         }
 
-        const sourceId = Number(source.droppableId);
-        const destinationId = Number(destination.droppableId);
+        setWidgetData(updatedWidgetData);
+    };
 
-        const sourceIndex = widgetData.findIndex(widget => widget.id === sourceId);
-        const destinationIndex = widgetData.findIndex(widget => widget.id === destinationId);
+    const handleAddWidget = (evt: ChangeEvent<HTMLSelectElement>, id: number) => {
+        const widgetId = widgetData.findIndex(widget => widget.drop === id);
+        const newWidgetData = [...widgetData];
+        newWidgetData[widgetId].data.push({ name: evt.target.value, props: null });
+        setWidgetData(newWidgetData);
+        evt.target.value = 'Добавить виджет';
+    };
 
-        if (sourceIndex === -1 || destinationIndex === -1) {
-            return;
+    const changeProps = (droppableId: number, index: number, props: any) => {
+        const updatedWidgetData = widgetData.map((widget, i) => {
+            if (i === droppableId) {
+                const newData = [...widget.data];
+                newData[index].props = props;
+                return { ...widget, data: newData };
+            }
+            return widget;
+        });
+        setWidgetData(updatedWidgetData);
+    };
+
+    const handleDeleteButton = (id: number, index: number) => {
+        const updatedWidgetData = [...widgetData];
+        const widgetIndex = updatedWidgetData.findIndex(widget => widget.drop === id);
+
+        if (widgetIndex !== -1) {
+            updatedWidgetData[widgetIndex].data.splice(index, 1);
+            setWidgetData(updatedWidgetData);
         }
-
-        const newWidgetData = [...widgetData];
-        const temp = newWidgetData[sourceIndex];
-        newWidgetData[sourceIndex] = newWidgetData[destinationIndex];
-        newWidgetData[destinationIndex] = temp;
-
-        setWidgetData(newWidgetData);
-    }
-
-    function handleAddWidget(evt: ChangeEvent<HTMLSelectElement>, id: number) {
-        const widgetId = widgetData.findIndex(widget => widget.id === id)
-        const SelectedWidget = componentDictionary[evt.target.value]
-        const newWidgetData = [...widgetData];
-        newWidgetData[widgetId] = { id, component: <SelectedWidget key={id} id={id} /> };
-        setWidgetData(newWidgetData);
-    }
-
-    function handleDeleteButton(id: number) {
-        const widgetId = widgetData.findIndex(widget => widget.id === id)
-        const newWidgetData = [...widgetData];
-        newWidgetData[widgetId] = { id, component: null };
-        setWidgetData(newWidgetData);
-    }
+    };
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div className="widget-block">
-                {widgetData.map(({ id, component }) => (
-                    <Widget
-                        key={id}
-                        id={id}
-                        columnData={component}
-                        onChange={(evt) => handleAddWidget(evt, id)}
-                        onClick={() => handleDeleteButton(id)}
-                    />
+                {widgetData.map(({ drop, data }) => (
+                    <div key={drop}>
+                        <select className="widget-select" defaultValue={'Добавить виджет'} onChange={(evt) => handleAddWidget(evt, drop)}>
+                            <option disabled>{'Добавить виджет'}</option>
+                            {widgetList.map((widget) => (
+                                <option key={widget.key} value={widget.key}>
+                                    {widget.value}
+                                </option>
+                            ))}
+                        </select>
+                        <Widget
+                            id={drop}
+                            columnData={data}
+                            onClick={handleDeleteButton}
+                            onChangeProps={changeProps}
+                        />
+                    </div>
                 ))}
             </div>
         </DragDropContext>

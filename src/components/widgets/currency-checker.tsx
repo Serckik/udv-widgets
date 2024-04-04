@@ -1,10 +1,15 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks"
 import { getCurrencyChecker, getCurrencyRubles, getTodayCurrency } from "../store/api-actions.ts/get-actions"
-import { Draggable } from "react-beautiful-dnd";
-import { v4 as uuidv4 } from 'uuid';
 
-function CurrencyChecker() {
+type CurrencyCheckerProps = {
+    index: number;
+    droppableId: number;
+    onChangeProps: (droppableId: number, index: number, props: any) => void
+    data: { mainCurrency: string, subCurrency: string }
+}
+
+function CurrencyChecker({ index, droppableId, onChangeProps, ...props }: CurrencyCheckerProps) {
     const dispatch = useAppDispatch()
 
     const prevValueRef = useRef<number>(0);
@@ -27,18 +32,35 @@ function CurrencyChecker() {
     }, [])
 
     useEffect(() => {
+        if (props.data) {
+            setMainCurrency(props.data.mainCurrency)
+            setSubCurrency(props.data.subCurrency)
+        }
+        else {
+            onChangeProps(droppableId, index, { mainCurrency: mainCurrency, subCurrency: subCurrency })
+        }
+    }, [props.data])
+
+    useEffect(() => {
+        if (props.data && props.data.mainCurrency !== mainCurrency && props.data.subCurrency !== subCurrency) { return }
         dispatch(getCurrencyChecker({ base_currency: mainCurrency, second_currency: subCurrency }))
             .then(data => {
-                setCurrencyChecker(data.payload as CurrencyChecker)
+                if (data.payload) {
+                    setCurrencyChecker(data.payload as CurrencyChecker)
+                }
             })
         dispatch(getTodayCurrency({ base_currency: mainCurrency, second_currency: subCurrency }))
             .then(data => {
-                setTodayCurrency(data.payload as number)
+                if (data.payload) {
+                    setTodayCurrency(data.payload as number)
+                }
             })
         const intervalId = setInterval(() => {
             dispatch(getCurrencyChecker({ base_currency: mainCurrency, second_currency: subCurrency }))
                 .then(data => {
-                    setCurrencyChecker(data.payload as CurrencyChecker)
+                    if (data.payload) {
+                        setCurrencyChecker(data.payload as CurrencyChecker)
+                    }
                 })
         }, 300000);
         return () => {
@@ -65,33 +87,31 @@ function CurrencyChecker() {
         const { name, value } = evt.target;
         if (name === 'main-currency') {
             setMainCurrency(value);
+            onChangeProps(droppableId, index, { mainCurrency: value, subCurrency: subCurrency })
         }
         else {
             setSubCurrency(value);
+            onChangeProps(droppableId, index, { mainCurrency: mainCurrency, subCurrency: value })
         }
         prevValueRef.current = 0
         setIsUp(null)
     }
 
     return (
-        <Draggable draggableId={uuidv4()} index={1}>
-            {(provided) => (
-                <div className="currency-checker-block" {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef}>
-                    <div className="currency-select-block">
-                        <select name="main-currency" className="main-currency" value={mainCurrency} onChange={handleCurrencyChange}>
-                            {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                        </select>
-                        <select name="sub-currency" className="sub-currency" value={subCurrency} onChange={handleCurrencyChange}>
-                            {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                        </select>
-                    </div>
-                    <div className="convert-value">
-                        <p className={isUp === null ? '' : isUp ? 'great' : 'bad'}>{currencyChecker.conversion_rate}</p>
-                        <div className={`triangle ${isUp === null ? '' : isUp ? 'great' : 'bad'}`}></div>
-                    </div>
-                </div>
-            )}
-        </Draggable>
+        <div className="currency-checker-block">
+            <div className="currency-select-block">
+                <select name="main-currency" className="main-currency" value={mainCurrency} onChange={handleCurrencyChange}>
+                    {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+                </select>
+                <select name="sub-currency" className="sub-currency" value={subCurrency} onChange={handleCurrencyChange}>
+                    {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+                </select>
+            </div>
+            <div className="convert-value">
+                <p className={isUp === null ? '' : isUp ? 'great' : 'bad'}>{currencyChecker.conversion_rate}</p>
+                <div className={`triangle ${isUp === null ? '' : isUp ? 'great' : 'bad'}`}></div>
+            </div>
+        </div>
     )
 }
 
