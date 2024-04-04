@@ -30,6 +30,7 @@ function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) 
     }, [props.data])
 
     useEffect(() => {
+        if (props.data && props.data !== selectedCity) { return }
         dispatch(getWeatherByCityId(selectedCity.id)).then((data) => {
             if (data.payload) {
                 setWeatherData(data.payload as WeatherType)
