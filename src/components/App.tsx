@@ -1,16 +1,33 @@
-import { Route, Routes } from "react-router-dom"
-import HistoryRouter from "./history-route"
-import browserHistory from "../browser-history"
 import MainPage from "../pages/main-page"
+import { Global, css } from '@emotion/react';
 
+const globalStyles = css`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat';
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+  }
+
+  body {
+    background-color: #F5F5F5;
+    padding-top: 40px;
+  }
+`
 
 function App() {
   return (
-    <HistoryRouter history={browserHistory}>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-      </Routes>
-    </HistoryRouter>
+    <>
+      <Global styles={globalStyles} />
+      <MainPage />
+    </>
   )
 }
 

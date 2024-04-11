@@ -1,6 +1,14 @@
 import { ChangeEvent, useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks"
 import { getCurrencyRubles } from "../store/api-actions.ts/get-actions"
+import { Select } from "../../pages/main-page";
+import styled from "@emotion/styled";
+import { CurrencyRublesTypes } from "../../types/currencyRubles";
+
+const Input = styled.input`
+    background-color: rgb(234, 197, 238);
+    padding-left: 10px;
+`
 
 type CurrencyRublesProps = {
     index: number;
@@ -10,10 +18,17 @@ type CurrencyRublesProps = {
 }
 
 function CurrencyRubles({ index, droppableId, onChangeProps, ...props }: CurrencyRublesProps) {
+    const RublesConversionFlex = styled.div`
+        height: 30px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 20px;
+    `
+
     const dispatch = useAppDispatch()
 
     const currencyData = useAppSelector((state) => state.currencyData)
-    const [currencyList, setCurrencyList] = useState<CurrencyListType[]>([])
+    const [currencyList, setCurrencyList] = useState<CurrencyRublesTypes.CurrencyListType[]>([])
     const [rubles, setRubles] = useState(1)
     const [otherCurrency, setOtherCurrency] = useState(1)
     const [selectedCurrency, setSelectedCurrency] = useState('')
@@ -61,17 +76,17 @@ function CurrencyRubles({ index, droppableId, onChangeProps, ...props }: Currenc
     }
 
     return (
-        <div className="rubles-conversion">
-            <div className="rubles-field">
-                <input type="number" value={rubles} onChange={handleRubleField}></input>
+        <div>
+            <RublesConversionFlex>
+                <Input type="number" value={rubles} onChange={handleRubleField}></Input>
                 <span>Российский рубль</span>
-            </div>
-            <div className="other-field">
-                <input type="number" value={otherCurrency} onChange={handleOtherCurrencyField}></input>
-                <select onChange={handleSelect} value={selectedCurrency}>
+            </RublesConversionFlex>
+            <RublesConversionFlex>
+                <Input type="number" value={otherCurrency} onChange={handleOtherCurrencyField}></Input>
+                <Select onChange={handleSelect} value={selectedCurrency}>
                     {currencyList.map(currency => <option key={currency.charCode} value={currency.charCode}>{currency.name} ({currency.charCode})</option>)}
-                </select>
-            </div>
+                </Select>
+            </RublesConversionFlex>
         </div>
     )
 }

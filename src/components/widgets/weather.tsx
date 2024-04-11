@@ -3,23 +3,47 @@ import { cities } from "../../const-data"
 import { useAppDispatch } from "../hooks"
 import { getWeatherByCityId } from "../store/api-actions.ts/get-actions"
 import { IMAGES_URL } from "../services/weather-api"
+import styled from "@emotion/styled";
+import { Select } from "../../pages/main-page"
+import { WeatherTypes } from "../../types/weather"
+import { WidgetsPropsType } from "../../types"
+
+const WeatherInfo = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+
+    > .weather-data {
+        text-align: right;
+    }
+
+    > .weather-data p{
+        margin-bottom: 5px;
+    }
+
+    > img{
+        background-color: rgb(82, 201, 238);
+        border-radius: 50%;
+    }
+`
 
 type WeatherProps = {
     index: number;
     droppableId: number
-    data: CityType;
+    data: WeatherTypes.CityType;
     onChangeProps: (droppableId: number, index: number, props: WidgetsPropsType) => void
 }
 
 function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) {
     const dispatch = useAppDispatch()
 
-    const [weatherData, setWeatherData] = useState<WeatherType>({
+    const [weatherData, setWeatherData] = useState<WeatherTypes.WeatherType>({
         feels_like: 0,
         temp: 0,
         icon: '',
     })
-    const [selectedCity, setSelectedCity] = useState<CityType>(cities[0])
+    const [selectedCity, setSelectedCity] = useState<WeatherTypes.CityType>(cities[0])
     useEffect(() => {
         if (props.data) {
             setSelectedCity(props.data)
@@ -33,7 +57,7 @@ function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) 
         if (props.data && props.data !== selectedCity) { return }
         dispatch(getWeatherByCityId(selectedCity.id)).then((data) => {
             if (data.payload) {
-                setWeatherData(data.payload as WeatherType)
+                setWeatherData(data.payload as WeatherTypes.WeatherType)
             }
         })
     }, [dispatch, selectedCity.id])
@@ -47,10 +71,10 @@ function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) 
 
     return (
         <div className="weather-block" >
-            <select value={selectedCity.id} onChange={handleSelect}>
+            <Select value={selectedCity.id} onChange={handleSelect}>
                 {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
-            </select>
-            <div className="weather-info">
+            </Select>
+            <WeatherInfo>
                 {weatherData.icon ?
                     <>
                         <img alt="Иконка погоды" src={`${IMAGES_URL}${weatherData.icon}.png`}></img>
@@ -61,7 +85,7 @@ function Weather({ index, droppableId, onChangeProps, ...props }: WeatherProps) 
                     </> :
                     <>Сервер не отвечает</>
                 }
-            </div>
+            </WeatherInfo>
         </div>
     )
 }

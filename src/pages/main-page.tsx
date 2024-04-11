@@ -2,6 +2,42 @@ import { ChangeEvent, useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import Widget from "../components/widget";
 import { widgetList } from "../const-data";
+import styled from "@emotion/styled";
+import { WidgetsPropsType } from "../types";
+
+const WidgetBlock = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 100px;
+    justify-content: center;
+`
+
+export const ElementsStyles = `
+    color: white;
+    background-color: rgb(155, 89, 163);
+    min-width: 64px;
+    padding: 3px 16px;
+    font-size: 1rem;
+    height: 30px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px;
+`
+
+export const Select = styled.select`
+    ${ElementsStyles}
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 10px;
+`
+
+export const Button = styled.button`
+    ${ElementsStyles}
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    border-radius: 30px;
+    margin-top: 20px;
+`
 
 export type WidgetComponent = {
     name: string;
@@ -71,17 +107,17 @@ function MainPage() {
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <div className="widget-block">
+            <WidgetBlock>
                 {widgetData.map(({ drop, data }) => (
                     <div key={drop}>
-                        <select className="widget-select" defaultValue={'Добавить виджет'} onChange={(evt) => handleAddWidget(evt, drop)}>
+                        <Select defaultValue={'Добавить виджет'} onChange={(evt) => handleAddWidget(evt, drop)}>
                             <option disabled>{'Добавить виджет'}</option>
                             {widgetList.map((widget) => (
                                 <option key={widget.key} value={widget.key}>
                                     {widget.value}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                         <Widget
                             id={drop}
                             columnData={data}
@@ -90,7 +126,7 @@ function MainPage() {
                         />
                     </div>
                 ))}
-            </div>
+            </WidgetBlock>
         </DragDropContext>
     );
 }

@@ -1,6 +1,45 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react"
-import { useAppDispatch, useAppSelector } from "../hooks"
-import { getCurrencyChecker, getCurrencyRubles, getTodayCurrency } from "../store/api-actions.ts/get-actions"
+import { useAppSelector } from "../hooks"
+import useCurrencyData from "../hooks/currency-checker";
+import styled from "@emotion/styled";
+import { Select } from "../../pages/main-page";
+
+interface CurrencyProps {
+    isUp: boolean | null;
+}
+
+const CurrencyCheckerFlex = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+`
+
+const ConvertValue = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    font-size: 2rem;
+`
+
+const Triangle = styled.div<CurrencyProps>`
+    transition: 1s;
+    margin-top: 10px;
+    position: relative;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 20px solid ${(props) => props.isUp === null ? 'rgb(73, 73, 73)' : props.isUp ? 'green' : 'red'};
+    transform: ${(props) => props.isUp === false && 'rotate(180deg)'};
+`
+
+
+const CurrencyText = styled.p<CurrencyProps>((props) => ({
+    transition: '1',
+    color: props.isUp === null ? '' : props.isUp ? 'lightgreen' : 'lightcoral',
+}))
 
 type CurrencyCheckerProps = {
     index: number;
@@ -10,26 +49,27 @@ type CurrencyCheckerProps = {
 }
 
 function CurrencyChecker({ index, droppableId, onChangeProps, ...props }: CurrencyCheckerProps) {
-    const dispatch = useAppDispatch()
+
+    const CurrencyCheckerSelect = styled(Select)`
+        display: inline-block;
+        margin: 0px;
+    `
+
+    const propsData = {
+        mainCurrency: props.data ? props.data.mainCurrency : 'EUR',
+        subCurrency: props.data ? props.data.subCurrency : 'USD',
+    }
 
     const prevValueRef = useRef<number>(0);
 
     const currencyData = useAppSelector((state) => state.currencyData)
-    const [todayCurrency, setTodayCurrency] = useState(0)
-    const [currencyChecker, setCurrencyChecker] = useState<CurrencyChecker>({
-        base_code: '',
-        target_code: '',
-        conversion_rate: 0,
-    })
 
     const [currencyList, setCurrencyList] = useState<string[]>([])
-    const [mainCurrency, setMainCurrency] = useState<string>('EUR')
-    const [subCurrency, setSubCurrency] = useState<string>('USD')
+    const [mainCurrency, setMainCurrency] = useState<string>(propsData.mainCurrency)
+    const [subCurrency, setSubCurrency] = useState<string>(propsData.subCurrency)
     const [isUp, setIsUp] = useState<boolean | null>(null)
 
-    useEffect(() => {
-        dispatch(getCurrencyRubles())
-    }, [])
+    const { currencyChecker, todayCurrency } = useCurrencyData(mainCurrency, subCurrency);
 
     useEffect(() => {
         if (props.data) {
@@ -40,33 +80,6 @@ function CurrencyChecker({ index, droppableId, onChangeProps, ...props }: Curren
             onChangeProps(droppableId, index, { mainCurrency: mainCurrency, subCurrency: subCurrency })
         }
     }, [props.data])
-
-    useEffect(() => {
-        if (props.data && props.data.mainCurrency !== mainCurrency && props.data.subCurrency !== subCurrency) { return }
-        dispatch(getCurrencyChecker({ base_currency: mainCurrency, second_currency: subCurrency }))
-            .then(data => {
-                if (data.payload) {
-                    setCurrencyChecker(data.payload as CurrencyChecker)
-                }
-            })
-        dispatch(getTodayCurrency({ base_currency: mainCurrency, second_currency: subCurrency }))
-            .then(data => {
-                if (data.payload) {
-                    setTodayCurrency(data.payload as number)
-                }
-            })
-        const intervalId = setInterval(() => {
-            dispatch(getCurrencyChecker({ base_currency: mainCurrency, second_currency: subCurrency }))
-                .then(data => {
-                    if (data.payload) {
-                        setCurrencyChecker(data.payload as CurrencyChecker)
-                    }
-                })
-        }, 300000);
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, [dispatch, mainCurrency, subCurrency])
 
     useEffect(() => {
         const cutCurrencyData = Object.keys(currencyData).map((key) => key).concat('RUB')
@@ -99,18 +112,18 @@ function CurrencyChecker({ index, droppableId, onChangeProps, ...props }: Curren
 
     return (
         <div className="currency-checker-block">
-            <div className="currency-select-block">
-                <select name="main-currency" className="main-currency" value={mainCurrency} onChange={handleCurrencyChange}>
+            <CurrencyCheckerFlex>
+                <CurrencyCheckerSelect name="main-currency" value={mainCurrency} onChange={handleCurrencyChange}>
                     {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                </select>
-                <select name="sub-currency" className="sub-currency" value={subCurrency} onChange={handleCurrencyChange}>
+                </CurrencyCheckerSelect>
+                <CurrencyCheckerSelect name="sub-currency" value={subCurrency} onChange={handleCurrencyChange}>
                     {currencyList.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                </select>
-            </div>
-            <div className="convert-value">
-                <p className={isUp === null ? '' : isUp ? 'great' : 'bad'}>{currencyChecker.conversion_rate}</p>
-                <div className={`triangle ${isUp === null ? '' : isUp ? 'great' : 'bad'}`}></div>
-            </div>
+                </CurrencyCheckerSelect>
+            </CurrencyCheckerFlex>
+            <ConvertValue>
+                <CurrencyText isUp={isUp}>{currencyChecker.conversion_rate}</CurrencyText>
+                <Triangle isUp={isUp}></Triangle>
+            </ConvertValue>
         </div>
     )
 }

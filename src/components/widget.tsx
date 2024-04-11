@@ -1,8 +1,29 @@
 import { Draggable, Droppable, DroppableProvided } from "react-beautiful-dnd";
-import { WidgetComponent } from "../pages/main-page";
+import { Button, WidgetComponent } from "../pages/main-page";
 import Weather from "./widgets/weather";
 import CurrencyRubles from "./widgets/currency-rubles";
 import CurrencyChecker from "./widgets/currency-checker";
+import styled from "@emotion/styled";
+import { WidgetsPropsType } from "../types";
+
+const WidgetElement = styled.div`
+    position: relative;
+    width: 450px;
+    color: white;
+    border-radius: 24px;
+    height: 750px;
+    background-color: rgb(73, 73, 73);
+    padding: 24px;
+    padding-top: 50px;
+    overflow: auto !important;
+`
+
+const WidgetComponentBlock = styled.div`
+    padding: 20px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    background-color: rgb(97, 95, 95);
+`
 
 type WidgetProps = {
     columnData: WidgetComponent[] | null;
@@ -44,23 +65,23 @@ function Widget({ columnData, onClick, id, onChangeProps }: WidgetProps) {
     return (
         <Droppable droppableId={String(id)}>
             {(provided: DroppableProvided) => (
-                <div className="widget" ref={provided.innerRef} {...provided.droppableProps}>
+                <WidgetElement ref={provided.innerRef} {...provided.droppableProps}>
                     {columnData && columnData.map((component, index) => (
                         <div key={index}>
                             <Draggable draggableId={String(index) + String(id)} index={index}>
                                 {(provided) => (
-                                    <div className="widget-component" {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef}>
+                                    <WidgetComponentBlock {...provided.draggableProps}  {...provided.dragHandleProps} ref={provided.innerRef}>
                                         {renderWidget(component.name, component.props, index, id)}
-                                        <button value={'deleteWidget'} onClick={() => handleDeleteClick(id, index)}>
+                                        <Button value={'deleteWidget'} onClick={() => handleDeleteClick(id, index)}>
                                             Удалить Виджет
-                                        </button>
-                                    </div>
+                                        </Button>
+                                    </WidgetComponentBlock>
                                 )}
                             </Draggable>
                         </div>
                     ))}
                     {provided.placeholder}
-                </div>
+                </WidgetElement>
             )}
         </Droppable>
     );
